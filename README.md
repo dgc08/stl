@@ -1,5 +1,5 @@
 # stl
-Python and bbash based Shell with module support
+Python and bash based Shell with module support
 
 ## TODO
 - Readme
