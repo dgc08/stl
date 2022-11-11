@@ -1,10 +1,10 @@
-import os
 from shutil import copy2
 from importlib import import_module
 from os import mkdir
 from shutil import rmtree
 
 def install_stl(module, type="-a", *args, **kwargs):
+    #TODO
     sh = kwargs["shell"]
     if type=="-a":
         m = module.replace(".py", "").replace(".stl", "")
@@ -15,13 +15,13 @@ def install_stl(module, type="-a", *args, **kwargs):
             pass
         copy2(module, dirr+"/"+"__init__.py")
 
-
-        extern = import_module("modules.extern")
         try:
             sh.load_extern()
         except Exception as e:
             rmtree(kwargs["stl_path"]+"/modules/extern/"+m)
             print("Failed installing module: "+str(e))
+            return
+        #TODO call install function
     if type=="--help":
         pass
     if type=="-s":
