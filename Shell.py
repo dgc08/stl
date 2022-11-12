@@ -1,6 +1,7 @@
 import os
 from shutil import copy2
 from importlib import import_module
+from sys import executable
 
 try:
     import pwd
@@ -48,12 +49,25 @@ class Shell():
             return False
         return self.compute(command)
 
-    def compute(self, command):
+    def compute(self, command, no_double = False):
+        args = command.split(" ")
+
+        # made it possible to use stl modules in something like pipes
+        if isinstance(self.commanddict.get(args[0], command), str):
+            is_STL_comm = self.commanddict.get(args[0], command).startswith("PY") or self.commanddict.get(args[0], command).startswith("2PY")
+        else:
+            is_STL_comm = False
+        if not command.startswith("stl ") and command.strip() != "" and not command.startswith("PY") and not no_double and not is_STL_comm and not command.startswith("2PY"):
+            command = executable + " " + self.script_path + " --no-double " + command
+            os.system(command)
+            return True
+
         bc = command
-        args = bc.split(" ")
+        # Command is set to is value in commanddict
         command = self.commanddict.get(args[0], command)
+        # checks if the evaluated command is a command itself
         if command in self.commanddict:
-            return self.compute(command)
+            return self.compute((command+" "+" ".join(args[1:])).strip())
         if callable(command):
             self._exec_func(command, *args)
         elif command.startswith("PY"):
@@ -63,8 +77,8 @@ class Shell():
                 if rexist:
                     self.t.r()
             elif command == "PY USE":
-                if len(args) <1:
-                    args[1] = ""
+                if len(args) <2:
+                    args.append(" ")
                 if os.path.isfile(args[1]):
                     self.use(args[1])
                 elif os.path.isfile(self.script_path+"/modules/extern/script_root/"+args[1]):
@@ -72,7 +86,7 @@ class Shell():
                 elif os.path.isfile(self.script_path+"/modules/extern/script_root/"+args[1]+".py"):
                     self.use(self.script_path+"/modules/extern/script_root/"+args[1]+".py")
                 else:
-                    print("File not found.", self.script_path+"/modules/extern/script_root/"+args[1])
+                    print("File not found.")
             elif command == "PY USED":
                 print("\n".join(self.used))
         else:
@@ -105,13 +119,14 @@ class Shell():
             print("\n")
             return True
         except Exception as e:
-            print("Module ded: "+str(e))
+            print("Module crashed: "+str(e))
 
     def use(self, file):
         copy2(file, self.script_path + "/modules/tmp/tmp.py")
         import modules.tmp.tmp as tmp
 
         self.command_append(tmp)
+        print(self.commanddict)
 
         del (tmp)
 
