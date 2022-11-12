@@ -15,12 +15,6 @@ def install_stl(module, type="-a", *args, **kwargs):
             pass
         copy2(module, dirr+"/"+"__init__.py")
 
-        try:
-            sh.load_extern()
-        except Exception as e:
-            rmtree(kwargs["stl_path"]+"/modules/extern/"+m)
-            print("Failed installing module: "+str(e))
-            return
         #TODO call install function
     if type=="--help":
         pass
@@ -29,4 +23,9 @@ def install_stl(module, type="-a", *args, **kwargs):
     if type=="-r":
         print(kwargs["stl_path"]+"/modules/extern/"+module)
         rmtree(kwargs["stl_path"]+"/modules/extern/"+module)
+    try:
         sh.load_extern()
+    except Exception as e:
+        rmtree(kwargs["stl_path"] + "/modules/extern/" + m)
+        print("Failed (un)installing module: " + str(e))
+        return

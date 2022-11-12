@@ -1,8 +1,0 @@
-modules = []
-consts = {"type":"module", "name":"test_module"}
-vars = {}
-
-def main(*args, **kwargs):
-	print("hi guys!", *args)
-
-commanddict = {"testm":main}

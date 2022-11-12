@@ -1,7 +1,7 @@
 import os
 from shutil import copy2
 from importlib import import_module
-from sys import executable
+from sys import executable, exit
 
 try:
     import pwd
@@ -37,10 +37,20 @@ class Shell():
     vars = {}
     script_path = ""
     forbidden = ["script_root", "__pycache__"]
+    stl_no_double = False
+
+    def cleanup(self):
+        if self.stl_no_double:
+            return
+        os.remove(self.script_path+"/modules/tmp/__init__.py")
+        copy2(self.script_path+"/modules/blank.py", self.script_path+"/modules/tmp/__init__.py")
+
+    def __del__(self):
+        self.cleanup()
 
     def shell(self):
         try:
-            command = input("cShell on '" + colored(os.getlogin(), "green") + "' || " + colored(os.getcwd(), "blue") + "> $ ")
+            command = input("STL on '" + colored(os.getlogin(), "green") + "' || " + colored(os.getcwd(), "blue") + "> $ ")
         except KeyboardInterrupt:
             print("\n")
             return True
@@ -49,7 +59,22 @@ class Shell():
             return False
         return self.compute(command)
 
+    #do not modify this
+    def emergency(self, com):
+        if com == "STL_EM_EXIT":
+            try:
+                self.cleanup()
+            except Exception as e:
+                print("Cleanup failed:", str(e))
+            exit(1)
+
     def compute(self, command, no_double = False):
+        #do not modify
+        self.emergency(command)
+
+
+
+        command = command.strip()
         args = command.split(" ")
 
         # made it possible to use stl modules in something like pipes
@@ -67,6 +92,7 @@ class Shell():
         command = self.commanddict.get(args[0], command)
         # checks if the evaluated command is a command itself
         if command in self.commanddict:
+            print("geez")
             return self.compute((command+" "+" ".join(args[1:])).strip())
         if callable(command):
             self._exec_func(command, *args)
@@ -96,6 +122,7 @@ class Shell():
         return True
     def load_extern(self):
         lst = os.listdir(self.script_path+"/modules/extern")
+        lst += os.listdir(self.script_path+"/modules")
         for i in lst:
             if os.path.isdir(self.script_path+"/modules/extern/"+i)  and i not in self.forbidden:
                 try:
@@ -105,7 +132,11 @@ class Shell():
                     continue
                 self.command_append(tmp)
                 del(tmp)
+        import modules.tmp as tmp
 
+        self.command_append(tmp)
+
+        del (tmp)
 
 
     def _exec_func(self, command, *args):
@@ -122,11 +153,10 @@ class Shell():
             print("Module crashed: "+str(e))
 
     def use(self, file):
-        copy2(file, self.script_path + "/modules/tmp/tmp.py")
-        import modules.tmp.tmp as tmp
+        copy2(file, self.script_path + "/modules/tmp/__init__.py")
+        import modules.tmp as tmp
 
         self.command_append(tmp)
-        print(self.commanddict)
 
         del (tmp)
 
@@ -141,7 +171,7 @@ class Shell():
         if rexist:
             from modules.stdlib.utils.comp import tabCompleter
             r.set_completer()
-            self.t = tabCompleter(self.commanddict.keys())
+            self.t = tabCompleter([i for i in self.commanddict.keys() if not i.startswith("2PY")])
             r.set_completer_delims('')
             r.parse_and_bind("tab: complete")
 
