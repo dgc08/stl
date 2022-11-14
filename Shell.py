@@ -3,11 +3,7 @@ from shutil import copy2
 from importlib import import_module
 from sys import executable, exit
 
-try:
-    import pwd
-    os.getlogin = lambda: pwd.getpwuid(os.getuid())[0]
-except ModuleNotFoundError:
-    pass
+
 rexist = False
 
 
@@ -16,16 +12,6 @@ try:
     rexist = True
 except ModuleNotFoundError:
     pass
-
-
-
-
-
-
-
-def colored(s, col):
-    cols = {"green":"\033[92m", "blue":"\033[94m"}
-    return cols[col] + s + "\033[0m"
 
 def system_wrapper(*args, **kwargs):
     return os.system(args[0])
@@ -50,7 +36,7 @@ class Shell():
 
     def shell(self):
         try:
-            command = input("STL on '" + colored(os.getlogin(), "green") + "' || " + colored(os.getcwd(), "blue") + "> $ ")
+            command = input(self.settings.get_Setting("look", "promt"))
         except KeyboardInterrupt:
             print("\n")
             return True
@@ -163,6 +149,8 @@ class Shell():
 
     def __init__(self):
         import modules.stdlib as stdlib
+        import settings
+        self.settings = settings.Root_Settings()
         self.command_append(stdlib)
         self.script_path = os.path.dirname(os.path.abspath(__file__))
         self.load_extern()
