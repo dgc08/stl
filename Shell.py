@@ -2,6 +2,7 @@ import os
 from shutil import copy2
 from importlib import import_module
 from sys import executable, exit
+from modules.stdlib.utils.SettingsHelper import helper
 
 
 rexist = False
@@ -13,8 +14,10 @@ try:
 except ModuleNotFoundError:
     pass
 
+sh = ""
+sh_end = ""
 def system_wrapper(*args, **kwargs):
-    return os.system(args[0])
+    return os.system(sh +  args[0] + sh_end)
 
 
 class Shell():
@@ -36,7 +39,8 @@ class Shell():
 
     def shell(self):
         try:
-            command = input(self.settings.get_Setting("look", "promt"))
+            command = input(self.settings.get_Setting("look", "prompt"))
+            self.emergency(command)
         except KeyboardInterrupt:
             print("\n")
             return True
@@ -48,10 +52,13 @@ class Shell():
     #do not modify this
     def emergency(self, com):
         if com == "STL_EM_EXIT":
+            print("Trying cleanup...")
             try:
                 self.cleanup()
+                print("Cleanup Success!")
             except Exception as e:
                 print("Cleanup failed:", str(e))
+            print("Exiting...")
             exit(1)
 
     def compute(self, command, no_double = False):
@@ -70,7 +77,7 @@ class Shell():
             is_STL_comm = False
         if not command.startswith("stl ") and command.strip() != "" and not command.startswith("PY") and not no_double and not is_STL_comm and not command.startswith("2PY"):
             command = executable + " " + self.script_path + " --no-double " + command
-            os.system(command)
+            system_wrapper(command)
             return True
 
         bc = command
@@ -155,6 +162,11 @@ class Shell():
         self.script_path = os.path.dirname(os.path.abspath(__file__))
         self.load_extern()
         del (stdlib)
+
+        global sh
+        global sh_end
+        sh = self.settings.get_Setting("system", "base-shell")
+        sh_end = self.settings.get_Setting("system", "base-shell-end")
 
         if rexist:
             from modules.stdlib.utils.comp import tabCompleter
