@@ -1,5 +1,5 @@
 from modules.stdlib.utils.SettingsHelper import helper
-
+from os import name
 from modules.settings.promt import promt
 
 
@@ -16,6 +16,9 @@ system_settings = {
 #Setting:system-end
 }
 
+if name == "nt":
+    system_settings["base-shell"] = helper("")
+    system_settings["base-shell-end"] = helper("")
 
 class Root_Settings:
 

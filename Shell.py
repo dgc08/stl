@@ -177,7 +177,6 @@ class Shell():
 
             r.set_completer(self.t.pathCompleter)
 
-        self.compute(" ")
 
     def command_append(self, module):
         try:
