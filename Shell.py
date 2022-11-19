@@ -2,7 +2,7 @@ import os
 from shutil import copy2
 from importlib import import_module
 from sys import executable, exit
-from modules.stdlib.utils.SettingsHelper import helper
+from .modules.stdlib.utils.SettingsHelper import helper
 
 
 rexist = False

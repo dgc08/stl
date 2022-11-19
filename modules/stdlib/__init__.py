@@ -1,6 +1,6 @@
 
-import modules.stdlib.builtins as builtinss
-import modules.stdlib.simpletools as simpletools
+from . import simpletools
+from . import builtins as builtinss
 
 commanddict = {}
 modules = [builtinss, simpletools]
