@@ -27,7 +27,7 @@ def main(*args, **kwargs):
     com = options[0] + " " + " ".join(compiler_settings) + " -o " + options[1]
     ret = os.system(com)
 
-    print("\033[1;34;40mLCI:\033[1;37;40m Starting process...")
+    print("\033[1;34;40mLCI:\033[1;37;40m Starting process...\033[0m")
     if ret == 0:
         os.system("chmod +rx " + options[1])
         com = "./" + options[1]
@@ -38,6 +38,7 @@ def main(*args, **kwargs):
             os.remove(options[1])
     else:
         print("Compiler returned not 0")
+    print()
 
 commanddict = {"lci":main}
 
