@@ -85,7 +85,6 @@ class Shell():
         command = self.commanddict.get(args[0], command)
         # checks if the evaluated command is a command itself
         if command in self.commanddict:
-            print("geez")
             return self.compute((command+" "+" ".join(args[1:])).strip())
         if callable(command):
             self._exec_func(command, *args)

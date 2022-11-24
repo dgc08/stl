@@ -17,8 +17,8 @@ system_settings = {
 }
 
 if name == "nt":
-    system_settings["base-shell"] = helper("")
-    system_settings["base-shell-end"] = helper("")
+    system_settings["base-shell"] = helper("cmd /c \"")
+    system_settings["base-shell-end"] = helper("\"")
 
 class Root_Settings:
 
